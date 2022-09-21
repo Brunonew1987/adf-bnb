@@ -1,0 +1,461 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adf-bnb"
+		},
+		"ls_azuredatalakestorage_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_azuredatalakestorage'"
+		},
+		"ls_azuredatalakestorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://sabnb.dfs.core.windows.net/"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set variable1 NEW 22",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "data_atual",
+							"value": {
+								"value": "@utcnow()",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "If Condition1",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Set variable1 NEW 22",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(\n    mod(dayOfMonth(variables('data_atual')),2), \n    0\n    )\n\n",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Set variable3",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "teste_if",
+										"value": "falso"
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Set variable2",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "teste_if",
+										"value": "Verdadeiro"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Set variable4",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "If Condition1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "final",
+							"value": {
+								"value": "@variables('teste_if')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"data_atual": {
+						"type": "String",
+						"defaultValue": "'1900-01-01'"
+					},
+					"teste_if": {
+						"type": "String"
+					},
+					"final": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-09-21T13:48:47Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_azuredatalakestorage')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_azuredatalakestorage_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_azuredatalakestorage_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Parquet_base_cluster_amplimax')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_azuredatalakestorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "carga fria",
+						"fileSystem": "silver"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_azuredatalakestorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/base_cluster_amplimax')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_azuredatalakestorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "BASE_CLUSTER_AMPLIMAX.csv",
+						"folderPath": "carga fria",
+						"fileSystem": "bronze"
+					},
+					"columnDelimiter": ";",
+					"encodingName": "WINDOWS-1252",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "ID",
+						"type": "String"
+					},
+					{
+						"name": "Código IBGE",
+						"type": "String"
+					},
+					{
+						"name": "Cidade",
+						"type": "String"
+					},
+					{
+						"name": "Potencial",
+						"type": "String"
+					},
+					{
+						"name": "# Média 3 Meses Amplimax Total",
+						"type": "String"
+					},
+					{
+						"name": "% Domicílio Rural",
+						"type": "String"
+					},
+					{
+						"name": "% Penetração Banda Larga",
+						"type": "String"
+					},
+					{
+						"name": "Domicílio Total",
+						"type": "String"
+					},
+					{
+						"name": "População",
+						"type": "String"
+					},
+					{
+						"name": "População Rural",
+						"type": "String"
+					},
+					{
+						"name": "Cluster",
+						"type": "String"
+					},
+					{
+						"name": "Data_Referencia",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_azuredatalakestorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline2')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "copia_csv_bronze",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "ID",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "ID",
+											"type": "String",
+											"physicalType": "UTF8"
+										}
+									},
+									{
+										"source": {
+											"name": "Código IBGE",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "CODIGO_IBGE",
+											"physicalType": "UTF8"
+										}
+									},
+									{
+										"source": {
+											"name": "Cidade",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "CIDADE",
+											"physicalType": "UTF8"
+										}
+									},
+									{
+										"source": {
+											"name": "Potencial",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "POTENCIAL",
+											"physicalType": "UTF8"
+										}
+									},
+									{
+										"source": {
+											"name": "# Média 3 Meses Amplimax Total",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "QUANTIDADE_MEDIA_3_MESES_AMPLIMAX_TOTAL",
+											"physicalType": "UTF8"
+										}
+									},
+									{
+										"source": {
+											"name": "% Domicílio Rural",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "PERCENTUAL_DOMICILIO_RURAL",
+											"physicalType": "UTF8"
+										}
+									},
+									{
+										"source": {
+											"name": "% Penetração Banda Larga",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "PERCENTUAL_PENETRACAO_BANDA_LARGA",
+											"physicalType": "UTF8"
+										}
+									},
+									{
+										"source": {
+											"name": "Domicílio Total",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "DOMICILIO_TOTAL",
+											"physicalType": "UTF8"
+										}
+									},
+									{
+										"source": {
+											"name": "População",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "POPULACAO",
+											"physicalType": "UTF8"
+										}
+									},
+									{
+										"source": {
+											"name": "População Rural",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "POPULACAO_RURAL",
+											"physicalType": "UTF8"
+										}
+									},
+									{
+										"source": {
+											"name": "Cluster",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "CLUSTER",
+											"physicalType": "UTF8"
+										}
+									},
+									{
+										"source": {
+											"name": "Data_Referencia",
+											"type": "DateTime",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "DATA_REFERENCIA",
+											"physicalType": "UTF8"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "base_cluster_amplimax",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Parquet_base_cluster_amplimax",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-09-21T20:17:28Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/base_cluster_amplimax')]",
+				"[concat(variables('factoryId'), '/datasets/Parquet_base_cluster_amplimax')]"
+			]
+		}
+	]
+}
