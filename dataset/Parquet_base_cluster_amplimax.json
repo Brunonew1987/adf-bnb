@@ -1,0 +1,21 @@
+{
+	"name": "Parquet_base_cluster_amplimax",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_azuredatalakestorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "carga fria",
+				"fileSystem": "silver"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

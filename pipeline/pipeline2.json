@@ -1,0 +1,201 @@
+{
+	"name": "pipeline2",
+	"properties": {
+		"activities": [
+			{
+				"name": "copia_csv_bronze",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ID",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "ID",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "Código IBGE",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "CODIGO_IBGE",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "Cidade",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "CIDADE",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "Potencial",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "POTENCIAL",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "# Média 3 Meses Amplimax Total",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "QUANTIDADE_MEDIA_3_MESES_AMPLIMAX_TOTAL",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "% Domicílio Rural",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "PERCENTUAL_DOMICILIO_RURAL",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "% Penetração Banda Larga",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "PERCENTUAL_PENETRACAO_BANDA_LARGA",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "Domicílio Total",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "DOMICILIO_TOTAL",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "População",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "POPULACAO",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "População Rural",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "POPULACAO_RURAL",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "Cluster",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "CLUSTER",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "Data_Referencia",
+									"type": "DateTime",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "DATA_REFERENCIA",
+									"physicalType": "UTF8"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "base_cluster_amplimax",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Parquet_base_cluster_amplimax",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2022-09-21T20:17:28Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

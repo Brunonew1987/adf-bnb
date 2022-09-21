@@ -1,0 +1,9 @@
+{
+	"name": "adf-bnb",
+	"location": "eastus2",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "4035a243-8497-4d59-b1c6-16f77c09a6a1",
+		"tenantId": "6f9760ef-2265-4a7d-b342-95c99c06a388"
+	}
+}
