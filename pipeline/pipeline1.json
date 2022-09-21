@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Set variable1",
+				"name": "Set variable1 NEW",
 				"type": "SetVariable",
 				"dependsOn": [],
 				"userProperties": [],
@@ -20,7 +20,7 @@
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "Set variable1",
+						"activity": "Set variable1 NEW",
 						"dependencyConditions": [
 							"Succeeded"
 						]
